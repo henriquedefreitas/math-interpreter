@@ -1,5 +1,5 @@
 from compiler.exceptions import SyntaxError
-from compiler.tokens import Integer, Real, Add, Sub, Mul, Div, Exp, ParBegin, ParEnd, EulerBegin, EulerEnd
+from compiler.tokens import Tag, Token
 
 
 class Lexer:
@@ -19,29 +19,31 @@ class Lexer:
                     self.cursor += 1
                     continue
                 if symbol == '$':
-                    return None
+                    return Token(Tag.END)
                 if symbol == 'e':
                     self.state = 3
                     self.cursor += 1
                     continue
-                if symbol in ['+', '-', '*', '/', '^', '(', ')', ']']:
+                if symbol in ['+', '-', '*', '/', '^', '(', ')', '[', ']']:
                     self.cursor += 1
                     if symbol == '+':
-                        return Add()
+                        return Token(Tag.ADD)
                     if symbol == '-':
-                        return Sub()
+                        return Token(Tag.SUB)
                     if symbol == '*':
-                        return Mul()
+                        return Token(Tag.MUL)
                     if symbol == '/':
-                        return Div()
+                        return Token(Tag.DIV)
                     if symbol == '^':
-                        return Exp()
+                        return Token(Tag.EXP)
                     if symbol == '(':
-                        return ParBegin()
+                        return Token(Tag.OPEN_PAR)
                     if symbol == ')':
-                        return ParEnd()
+                        return Token(Tag.CLOSE_PAR)
+                    if symbol == '[':
+                        return Token(Tag.OPEN_BRACKET)
                     if symbol == ']':
-                        return EulerEnd()
+                        return Token(Tag.CLOSE_BRACKET)
 
                 if symbol.isnumeric():
                     buffer += symbol
@@ -49,7 +51,8 @@ class Lexer:
                     self.cursor += 1
                     continue
                 else:
-                    raise SyntaxError('Expected an operator or a digit')
+                    raise SyntaxError(f'Expected an operator, digit,\
+                        parenthesis or bracket, instead found a \"{symbol}\"')
 
             if self.state == 1:
                 if symbol.isnumeric():
@@ -62,7 +65,7 @@ class Lexer:
                     self.cursor += 1
                     continue
                 else:
-                    return Integer(int(buffer))
+                    return Token(Tag.NUM, buffer)
 
             if self.state == 6:
                 if symbol.isnumeric():
@@ -78,7 +81,7 @@ class Lexer:
                     self.cursor += 1
                     continue
                 else:
-                    return Real(float(buffer))
+                    return Token(Tag.NUM, buffer)
 
             if self.state == 3:
                 if symbol == 'x':
@@ -90,15 +93,7 @@ class Lexer:
 
             if self.state == 4:
                 if symbol == 'p':
-                    self.state = 5
                     self.cursor += 1
-                    continue
+                    return Token(Tag.EULER)
                 else:
                     raise SyntaxError('Expected an \"p\"')
-
-            if self.state == 5:
-                if symbol == '[':
-                    self.cursor += 1
-                    return EulerBegin()
-                else:
-                    raise SyntaxError('Expected an \"[\"')
