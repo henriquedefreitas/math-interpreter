@@ -1,28 +1,6 @@
 from compiler.lexer import Lexer
-
-
-def is_terminal(string):
-    if string in ['E', 'E\'', 'T', 'T\'', 'P', 'P\'', 'F']:
-        return False
-    return True
-
-
-def reverse(rule):
-    new_rule = []
-    for i in range(len(rule) - 1, -1, -1):
-        new_rule.append(rule[i])
-    return new_rule
-
-
-class Node:
-    def __init__(self, symbol, rule):
-        self.symbol = symbol
-        self.terminal = True if is_terminal(symbol) else False
-        self.children = []
-        self.rule = rule
-
-    def add_child(self, child):
-        self.children.insert(0, child)
+from compiler.sdd import Node, is_terminal, E1, EL1, EL2, EL3, T1, TL1, TL2, TL3, P1, P2, PL1, PL2, F1, F2
+from compiler.utils import reverse
 
 
 class Parser:
@@ -33,116 +11,120 @@ class Parser:
     def parse_tree(self):
         stack = ['$', 'E']
 
-        tree = Node('E')
-        node_stack = ['$', tree]
+        self.tree = Node('E')
+        self.tree.set_rule(E1)
+        node_stack = ['$', self.tree]
 
         cur_symbol = stack.pop()
         cur_token = self.lexer.get_token()
-
         node = node_stack.pop()
 
+        # While the current symbol is not the last
         while cur_symbol != '$':
-            # print(f'stack = {stack}')
             # print(f'cur_symbol = {cur_symbol}')
             # print(f'cur_token = {cur_token.get_symbol()}')
-            # print()
-            # If current symbol is non terminal
+            # print(f'node = {node.symbol}')
+            # If the current symbol is not a terminal
             if not is_terminal(cur_symbol):
+                # Get the rule for the current symbol and current token
                 rule = self.table[cur_symbol][cur_token.get_symbol()]
-                # print(f'rule = {rule}')
+                # Check if an entry for that pair exists
                 if rule is None:
-                    raise SyntaxError(f'\"{cur_token.symbol}\" mispositioned')
-                else:
-                    # print(rule)
-                    for symbol in reverse(rule):
-                        new_node = Node(symbol, rule)
-                        node.add_child(new_node)
-                        if not is_terminal(symbol):
-                            node_stack.append(new_node)
-                        stack.append(symbol)
-                    node = node_stack.pop()
+                    raise SyntaxError(f'A \"{cur_token.symbol}\" wasn\'t expected')
+                # Define the node rule/type
+                node.set_rule(rule[1])
+                # Instantiates "blank" nodes for each child of the node according to the rule found
+                for symbol in reverse(rule[0]):
+                    new_node = Node(symbol)
+                    node.add_child(new_node)
+                    node_stack.append(new_node)
+                    stack.append(symbol)
             # If current symbol is terminal
             else:
-                if cur_symbol == '&':
-                    cur_symbol = stack.pop()
-                    continue
+                # if current terminal matches current token, pop() token stack
                 if cur_symbol == cur_token.get_symbol():
+                    # if token has a value, set node value as well
+                    if hasattr(cur_token, 'lexval'):
+                        node.set_lexval(cur_token.lexval)
                     cur_token = self.lexer.get_token()
-                else:
+                elif cur_symbol != '&':
                     raise SyntaxError(
-                        f'\"{cur_token.get_symbol()}\" mispositioned')
-
+                        f'A \"{cur_token.get_symbol()}\" wasn\'t expected')
+            node = node_stack.pop()
             cur_symbol = stack.pop()
 
-        print('Syntax analysis finished')
+        # print('Syntax analysis finished')
 
-        return tree
+    def execute(self):
+        self.tree.rule(self.tree)
+        print(self.tree.val)
 
     def __construct_table(self):
         # Initialize the table
+
         self.table = {
             'E': {
-                '$': None, 'id': None, '+': None, '-': None, '*': None,
+                '$': None, 'num': None, '+': None, '-': None, '*': None,
                 '/': None, '^': None, '(': None, ')': None, 'exp[': None
             },
             'E\'': {
-                '$': None, 'id': None, '+': None, '-': None, '*': None,
+                '$': None, 'num': None, '+': None, '-': None, '*': None,
                 '/': None, '^': None, '(': None, ')': None, 'exp[': None
             },
             'T': {
-                '$': None, 'id': None, '+': None, '-': None, '*': None,
+                '$': None, 'num': None, '+': None, '-': None, '*': None,
                 '/': None, '^': None, '(': None, ')': None, 'exp[': None
             },
             'T\'': {
-                '$': None, 'id': None, '+': None, '-': None, '*': None,
+                '$': None, 'num': None, '+': None, '-': None, '*': None,
                 '/': None, '^': None, '(': None, ')': None, 'exp[': None
             },
             'P': {
-                '$': None, 'id': None, '+': None, '-': None, '*': None,
+                '$': None, 'num': None, '+': None, '-': None, '*': None,
                 '/': None, '^': None, '(': None, ')': None, 'exp[': None
             },
             'P\'': {
-                '$': None, 'id': None, '+': None, '-': None, '*': None,
+                '$': None, 'num': None, '+': None, '-': None, '*': None,
                 '/': None, '^': None, '(': None, ')': None, 'exp[': None
             },
             'F': {
-                '$': None, 'id': None, '+': None, '-': None, '*': None,
+                '$': None, 'num': None, '+': None, '-': None, '*': None,
                 '/': None, '^': None, '(': None, ')': None, 'exp[': None
             }
         }
 
         # Add all table entries based on the rules
-        self.table['E']['id'] = [['T', 'E\'']]
-        self.table['E']['('] = ['T', 'E\'']
-        self.table['E']['exp'] = ['T', 'E\'']
+        self.table['E']['num'] = [['T', 'E\''], E1]
+        self.table['E']['('] = [['T', 'E\''], E1]
+        self.table['E']['exp'] = [['T', 'E\''], E1]
 
-        self.table['E\'']['$'] = ['&']
-        self.table['E\'']['+'] = ['+', 'T', 'E\'']
-        self.table['E\'']['-'] = ['-', 'T', 'E\'']
-        self.table['E\''][')'] = ['&']
+        self.table['E\'']['$'] = [['&'], EL3]
+        self.table['E\'']['+'] = [['+', 'T', 'E\''], EL1]
+        self.table['E\'']['-'] = [['-', 'T', 'E\''], EL2]
+        self.table['E\''][')'] = [['&'], EL3]
 
-        self.table['T']['id'] = ['P', 'T\'']
-        self.table['T']['('] = ['P', 'T\'']
-        self.table['T']['exp'] = ['P', 'T\'']
+        self.table['T']['num'] = [['P', 'T\''], T1]
+        self.table['T']['('] = [['P', 'T\''], T1]
+        self.table['T']['exp'] = [['P', 'T\''], T1]
 
-        self.table['T\'']['$'] = ['&']
-        self.table['T\'']['+'] = ['&']
-        self.table['T\'']['-'] = ['&']
-        self.table['T\'']['*'] = ['*', 'P', 'T\'']
-        self.table['T\'']['/'] = ['/', 'P', 'T\'']
-        self.table['T\''][')'] = ['&']
+        self.table['T\'']['$'] = [['&'], TL3]
+        self.table['T\'']['+'] = [['&'], TL3]
+        self.table['T\'']['-'] = [['&'], TL3]
+        self.table['T\'']['*'] = [['*', 'P', 'T\''], TL1]
+        self.table['T\'']['/'] = [['/', 'P', 'T\''], TL2]
+        self.table['T\''][')'] = [['&'], TL3]
 
-        self.table['P']['id'] = ['F', 'P\'']
-        self.table['P']['('] = ['F', 'P\'']
-        self.table['P']['exp'] = ['exp', '[', 'F', ']', 'P\'']
+        self.table['P']['num'] = [['F', 'P\''], P1]
+        self.table['P']['('] = [['F', 'P\''], P1]
+        self.table['P']['exp'] = [['exp', '[', 'F', ']', 'P\''], P2]
 
-        self.table['P\'']['$'] = ['&']
-        self.table['P\'']['+'] = ['&']
-        self.table['P\'']['-'] = ['&']
-        self.table['P\'']['*'] = ['&']
-        self.table['P\'']['/'] = ['&']
-        self.table['P\'']['^'] = ['^', 'F', 'P\'']
-        self.table['P\''][')'] = ['&']
+        self.table['P\'']['$'] = [['&'], PL2]
+        self.table['P\'']['+'] = [['&'], PL2]
+        self.table['P\'']['-'] = [['&'], PL2]
+        self.table['P\'']['*'] = [['&'], PL2]
+        self.table['P\'']['/'] = [['&'], PL2]
+        self.table['P\'']['^'] = [['^', 'F', 'P\''], PL1]
+        self.table['P\''][')'] = [['&'], PL2]
 
-        self.table['F']['id'] = ['id']
-        self.table['F']['('] = ['(', 'E', ')']
+        self.table['F']['num'] = [['num'], F2]
+        self.table['F']['('] = [['(', 'E', ')'], F1]
