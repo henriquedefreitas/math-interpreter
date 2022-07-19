@@ -55,9 +55,11 @@ class Parser:
 
         # print('Syntax analysis finished')
 
-    def execute(self):
+    def run(self):
         self.tree.rule(self.tree)
-        print(self.tree.val)
+        
+    def get_result(self):
+        return self.tree.val
 
     def __construct_table(self):
         # Initialize the table
