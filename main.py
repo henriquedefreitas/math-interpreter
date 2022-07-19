@@ -10,19 +10,19 @@ def main():
     parser.add_argument(
         'path',
         type=str,
-        help='Path to the source code file'
+        help='path to the source code file'
     )
     parser.add_argument(
         '-t',
         '--show-tree',
         action='store_true',
-        help='Print the syntax tree'
+        help='print the syntax tree'
     )
     parser.add_argument(
         '-e',
         '--show-exp',
         action='store_true',
-        help='Show the expression'
+        help='show the expression'
     )
     args = parser.parse_args()
 
@@ -32,16 +32,19 @@ def main():
 
     # Analyse line syntax and run its code
     for line in source_code.split('\n'):
-        if args.show_exp is True:
-            print(line)
-        parser = Parser(line)
-        parser.parse_tree()
-        if args.show_tree is True:
-            print('Syntax tree:')
-            print_tree(parser.tree)
-        parser.run()
-        result = parser.get_result()
-        print(result)
+        # If line isn't a blank line
+        line = line.strip()
+        if line != '':
+            if args.show_exp is True:
+                print(line)
+            parser = Parser(line)
+            parser.parse_tree()
+            if args.show_tree is True:
+                print('Syntax tree:')
+                print_tree(parser.tree)
+            parser.run()
+            result = parser.get_result()
+            print(result)
 
 
 if __name__ == '__main__':
