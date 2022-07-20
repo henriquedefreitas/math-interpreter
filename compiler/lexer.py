@@ -1,5 +1,6 @@
 from compiler.exceptions import SyntaxError
-from compiler.tokens import Tag, Token
+from compiler.token import Token
+from compiler.language import OPERATORS
 
 
 class Lexer:
@@ -15,44 +16,25 @@ class Lexer:
             symbol = self.source_code[self.cursor]
 
             if self.state == 0:
+                if symbol == '$':
+                    return Token('$')
                 if symbol in [' ', '\n']:
                     self.cursor += 1
                     continue
-                if symbol == '$':
-                    return Token(Tag.END)
-                if symbol == 'e':
-                    self.state = 3
+                if symbol in OPERATORS:
                     self.cursor += 1
-                    continue
-                if symbol in ['+', '-', '*', '/', '^', '(', ')', '[', ']']:
-                    self.cursor += 1
-                    if symbol == '+':
-                        return Token(Tag.ADD)
-                    if symbol == '-':
-                        return Token(Tag.SUB)
-                    if symbol == '*':
-                        return Token(Tag.MUL)
-                    if symbol == '/':
-                        return Token(Tag.DIV)
-                    if symbol == '^':
-                        return Token(Tag.EXP)
-                    if symbol == '(':
-                        return Token(Tag.OPEN_PAR)
-                    if symbol == ')':
-                        return Token(Tag.CLOSE_PAR)
-                    if symbol == '[':
-                        return Token(Tag.OPEN_BRACKET)
-                    if symbol == ']':
-                        return Token(Tag.CLOSE_BRACKET)
-
+                    return Token(symbol)
                 if symbol.isnumeric():
                     buffer += symbol
                     self.state = 1
                     self.cursor += 1
                     continue
+                if symbol == 'e':
+                    self.state = 4
+                    self.cursor += 1
+                    continue
                 else:
-                    raise SyntaxError(f'Expected an operator, digit,\
-                        parenthesis or bracket, instead found a \"{symbol}\"')
+                    raise SyntaxError(f'Col {self.cursor + 1}. Found a symbol that doesn\'t belong to the language: \"{symbol}\"')
 
             if self.state == 1:
                 if symbol.isnumeric():
@@ -60,40 +42,41 @@ class Lexer:
                     self.cursor += 1
                     continue
                 if symbol == '.':
-                    self.state = 6
+                    self.state = 2
                     buffer += symbol
                     self.cursor += 1
                     continue
                 else:
-                    return Token(Tag.NUM, buffer)
-
-            if self.state == 6:
-                if symbol.isnumeric():
-                    buffer += symbol
-                    self.cursor += 1
-                    continue
-                else:
-                    raise SyntaxError('Expected a digit after \".\"')
+                    return Token('num', buffer)
 
             if self.state == 2:
                 if symbol.isnumeric():
+                    self.state = 3
                     buffer += symbol
                     self.cursor += 1
                     continue
                 else:
-                    return Token(Tag.NUM, buffer)
+                    raise SyntaxError(f'Col {self.cursor + 1}. Expected a digit after \".\". Found a \"{symbol}\"')
 
             if self.state == 3:
-                if symbol == 'x':
-                    self.state = 4
+                if symbol.isnumeric():
+                    buffer += symbol
                     self.cursor += 1
                     continue
                 else:
-                    raise SyntaxError('Expected an \"x\"')
+                    return Token('num', buffer)
 
             if self.state == 4:
+                if symbol == 'x':
+                    self.state = 5
+                    self.cursor += 1
+                    continue
+                else:
+                    raise SyntaxError(f'Col {self.cursor + 1}. Expected a \"x\". Found a \"{symbol}\"')
+
+            if self.state == 5:
                 if symbol == 'p':
                     self.cursor += 1
-                    return Token(Tag.EULER)
+                    return Token('exp')
                 else:
-                    raise SyntaxError('Expected an \"p\"')
+                    raise SyntaxError(f'Col {self.cursor + 1}. Expected a \"p\". Found a \"{symbol}\"')

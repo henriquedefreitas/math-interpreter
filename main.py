@@ -1,5 +1,6 @@
 from compiler.parser import Parser
 from compiler.utils import print_tree
+from compiler.exceptions import SyntaxError
 import argparse
 
 
@@ -31,16 +32,18 @@ def main():
         source_code = file.read()
 
     # Analyse line syntax and run its code
-    for line in source_code.split('\n'):
+    for i, line in enumerate(source_code.split('\n')):
         # If line isn't a blank line
         line = line.strip()
         if line != '':
             if args.show_exp is True:
                 print(line)
             parser = Parser(line)
-            parser.parse_tree()
+            try:
+                parser.parse_tree()
+            except SyntaxError as e:
+                raise SyntaxError(f'Line {i + 1}; ' + str(e))
             if args.show_tree is True:
-                print('Syntax tree:')
                 print_tree(parser.tree)
             parser.run()
             result = parser.get_result()

@@ -1,15 +1,19 @@
+from compiler.language import TERMINAL
+
+
 def reverse(rule):
     new_rule = []
     for i in range(len(rule) - 1, -1, -1):
         new_rule.append(rule[i])
     return new_rule
 
+
 def is_terminal(string):
-    if string in ['E', 'E\'', 'T', 'T\'', 'P', 'P\'', 'F']:
-        return False
-    return True
+    return True if string in TERMINAL else False
+
 
 def print_tree(tree):
+    # print('Syntax tree:')
     print(tree.symbol)
     for child in tree.children:
         print_child(child, 1)
