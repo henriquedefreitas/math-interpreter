@@ -1,0 +1,14 @@
+<E>  -> <T> {E'.inh = T.val} <E'> {T.val = E'.syn}
+<E'> -> +<T> {E'.inh = E'.inh + T.val} <E'> {E'.syn = E'.syn}
+<E'> -> -<T> {E'.inh = E'.inh - T.val} <E'> {E'.syn = E'.syn}
+<E'> -> & {E'.syn = E'.inh}
+<T>  -> <P> {T'.inh = P.val} <T'> {T.val = T'.syn}
+<T'> -> *<P> {T'.inh = T'.inh * P.val} <T'> {T'.syn = T'.syn}
+<T'> -> /<P> {T'.inh = T'.inh / P.val} <T'> {T'.syn = T'.syn}
+<T'> -> & {T'.syn = T'.inh}
+<P>  -> <F> {P'.inh = F.val} <P'> {P.val = P'.syn}
+<P>  -> exp[<F> {P'.inh = F.val}]<P'> {P.syn = P'.syn}
+<P'> -> ^<F> {P'.inh = P'.inh / F.val} <P'> {P'.syn = P'.syn}
+<P'> -> & {P'.syn = P'.inh}
+<F>  -> (<E> {F.val = E.val} )
+<F>  -> id {F.val = id.lexval}

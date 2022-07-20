@@ -1,0 +1,15 @@
+First(E) = id, (, e
+First(E') = &, +, -
+First(T) = id, (, e
+First(T') = &, *, /
+First(P) = id, (, e
+First(P') = &, ^
+First(F) = id, (
+
+Follow(E) = $, )
+Follow(E') = $, )
+Follow(T) = $, +, -, )
+Follow(T') = $, +, -, )
+Follow(P) = $, +, -, *, /, )
+Follow(P') = $, +, -, *, /, )
+Follow(F) = $, +, -, *, /, ^, ), ]
