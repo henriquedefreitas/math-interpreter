@@ -1,13 +1,13 @@
-from compiler.parser import Parser
-from compiler.utils import print_tree
-from compiler.exceptions import SyntaxError
+from interpreter.parser import Parser
+from interpreter.utils import print_tree
+from interpreter.exceptions import SyntaxError
 import argparse
 
 
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser(
-        description='A compiler for simple math expressions')
+        description='A interpreter for computing simple math expressions')
     parser.add_argument(
         'path',
         type=str,

@@ -1,42 +1,41 @@
-# Instructions for using
+# Simple Math Expressions Interpreter
 
 ## Requirements
 
-Python installed (Built with Python 3.10.2)
+- Python installed (Built with Python 3.10.2)
 
-## Installing
+## Installation
 
-Download and unzip the .zip file or clone the repository with
-
-```text
-git clone https://github.com/henriquedefreitas/math-compiler.git
-```
-
-Access the compiler directory and install its library with
+1. Download and unzip the .zip file or clone the repository with
 
 ```text
-python -m pip install -e .
+git clone https://github.com/henriquedefreitas/math-interpreter.git
 ```
 
-Run the program with
+2. Access the interpreter directory and install the library with
+
+```text
+python -m pip install .
+```
+
+3. Run the program with
 
 ```text
 python main.py <path_to_input_file>
 ```
 
-## Parameters
+## Optional Parameters
 
 - -t, --show-tree -> Prints the syntax tree
 - -e, --show-exp  -> Prints the input expression
 
+---
 
-# Compiladores I
-
-## Enunciado do Projeto Final
+## Projeto Final de Compiladores I
 
 Implemente o Analisador Léxico, Sintático e Semântico da gramática a seguir. Como resultado é esperado que o programa calcule o resultado da expressão passada por parâmetro. Poderá ser utilizado o analisador sintático descendente não recursivo e/ou o ascendente. NÃO será permitido o analisador sintático recursivo. Não será permitido o uso de expressões regulares.
 
-## Gramatica
+### Gramatica
 
 ```text
 <E> ➝ <E>+<T> | <E>-<T> | <T>
@@ -47,7 +46,7 @@ Implemente o Analisador Léxico, Sintático e Semântico da gramática a seguir.
 
 id = número inteiro ou real
 
-## Exemplos
+### Exemplos
 
 ```text
 1+2*3^4             //163
@@ -56,11 +55,11 @@ id = número inteiro ou real
 1+(2*3)+exp[4]      //61,598150033
 ```
 
-# Implementacao
+### Implementacao
 
 Para a implementacao, foi escolhido o analisador sintatico descendente.
 
-## Gramatica resultante apos a remocao da recursao a esquerda
+### Gramatica resultante apos a remocao da recursao a esquerda
 
 ```text
 <E>  -> <T><E'>
@@ -79,7 +78,7 @@ Para a implementacao, foi escolhido o analisador sintatico descendente.
 <F>  -> id
 ```
 
-## First e Follow
+### First e Follow
 
 ```text
 First(E) = id, (, e
@@ -99,15 +98,15 @@ Follow(P') = $, +, -, *, /, )
 Follow(F) = $, +, -, *, /, ^, ), ]
 ```
 
-## Automato do analisador lexico
+### Automato do analisador lexico
 
 ![automata](grammar/automata.jpeg)
 
-## Tabela do analisador sintatico
+### Tabela do analisador sintatico
 
 ![syntax table](grammar/syntax-table.png)
 
-## Definicao dirigida a sintaxe
+### Definicao dirigida a sintaxe
 
 ```text
 <E>  -> <T> {E'.inh = T.val} <E'> {T.val = E'.syn}

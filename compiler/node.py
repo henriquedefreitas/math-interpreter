@@ -1,4 +1,4 @@
-from compiler.utils import is_terminal
+from interpreter.utils import is_terminal
 
 
 class Node:

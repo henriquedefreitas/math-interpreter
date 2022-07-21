@@ -1,7 +1,7 @@
-from compiler.lexer import Lexer
-from compiler.utils import reverse, is_terminal
-from compiler.node import Node
-from compiler.language import TABLE, E1
+from interpreter.lexer import Lexer
+from interpreter.utils import reverse, is_terminal
+from interpreter.node import Node
+from interpreter.language import TABLE, E1
 
 
 class Parser:

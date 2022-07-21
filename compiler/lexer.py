@@ -1,6 +1,6 @@
-from compiler.exceptions import SyntaxError
-from compiler.token import Token
-from compiler.language import OPERATORS
+from interpreter.exceptions import SyntaxError
+from interpreter.token import Token
+from interpreter.language import OPERATORS
 
 
 class Lexer:

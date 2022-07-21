@@ -1,4 +1,4 @@
-from compiler.language import TERMINAL
+from interpreter.language import TERMINAL
 
 
 def reverse(rule):
